@@ -1,5 +1,5 @@
 name: bok_vip_flutter
-description: BOK VIP Flutter native conversion from PWA design.
+description: Fullscreen WebView APK for PWA.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -9,12 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
-  video_player: ^2.9.2
+  webview_flutter: ^4.10.0
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/splash.mp4
-    - assets/img/
-    - assets/icons/
