@@ -138,6 +138,7 @@ final menuItems = <MenuItem>[
 ];
 class MenuTile extends StatelessWidget { final MenuItem item; const MenuTile({super.key, required this.item}); @override Widget build(BuildContext context) { return InkWell(onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (_)=>item.page())), child: Container(decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xffeeeeee)), boxShadow: const [BoxShadow(color: Color(0x11000000), blurRadius: 7, offset: Offset(0,2))]), padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [Expanded(child: Text(item.title, textAlign: TextAlign.right, style: const TextStyle(color: darkText, fontSize: 15, fontWeight: FontWeight.w500))), const SizedBox(width: 10), Image.asset(item.asset, width: 29, height: 29, errorBuilder: (_,__,___)=>const Icon(Icons.widgets, color: red2))]))); }}
 
+
 class BottomNav extends StatelessWidget {
   const BottomNav({super.key});
 
