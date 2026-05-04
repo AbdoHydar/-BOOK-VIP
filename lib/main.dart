@@ -137,7 +137,53 @@ final menuItems = <MenuItem>[
   MenuItem('خدمات العملات الاجنبية','assets/img/grid_13.png',()=>const ComingSoonPage(title:'خدمات العملات الاجنبية')), MenuItem('التجارة الإلكترونية','assets/img/grid_14.png',()=>const ComingSoonPage(title:'التجارة الإلكترونية')),
 ];
 class MenuTile extends StatelessWidget { final MenuItem item; const MenuTile({super.key, required this.item}); @override Widget build(BuildContext context) { return InkWell(onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (_)=>item.page())), child: Container(decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xffeeeeee)), boxShadow: const [BoxShadow(color: Color(0x11000000), blurRadius: 7, offset: Offset(0,2))]), padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [Expanded(child: Text(item.title, textAlign: TextAlign.right, style: const TextStyle(color: darkText, fontSize: 15, fontWeight: FontWeight.w500))), const SizedBox(width: 10), Image.asset(item.asset, width: 29, height: 29, errorBuilder: (_,__,___)=>const Icon(Icons.widgets, color: red2))]))); }}
-class BottomNav extends StatelessWidget { const BottomNav({super.key}); @override Widget build(BuildContext context) { const labels=['الرئيسية','الحسابات','المدفوعات','البطاقات','المزيد']; const icons=[Icons.home,Icons.account_balance_wallet,Icons.payments,Icons.credit_card,Icons.more_horiz]; return Container(height: 74, decoration: const BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: lightBorder))), child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: List.generate(5, (i)=>Column(mainAxisAlignment: MainAxisAlignment.center, children:[Icon(icons[i], color: i==0?red2:Colors.grey), Text(labels[i], style: TextStyle(fontSize: 12, color: i==0?red2:Colors.grey, fontWeight: i==0?FontWeight.bold:FontWeight.normal))]))); }}
+
+class BottomNav extends StatelessWidget {
+  const BottomNav({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    const labels = ['الرئيسية', 'الحسابات', 'المدفوعات', 'البطاقات', 'المزيد'];
+    const icons = [
+      Icons.home,
+      Icons.account_balance_wallet,
+      Icons.payments,
+      Icons.credit_card,
+      Icons.more_horiz,
+    ];
+
+    return Container(
+      height: 74,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: lightBorder)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: List.generate(
+          5,
+          (i) => Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icons[i],
+                color: i == 0 ? red2 : Colors.grey,
+              ),
+              Text(
+                labels[i],
+                style: TextStyle(
+                  fontSize: 12,
+                  color: i == 0 ? red2 : Colors.grey,
+                  fontWeight: i == 0 ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class TopBar extends StatelessWidget { final String title; const TopBar(this.title,{super.key}); @override Widget build(BuildContext context) { return Container(height: 64, decoration: const BoxDecoration(gradient: LinearGradient(colors:[red1, red2])), child: SafeArea(bottom:false, child: Row(children:[IconButton(onPressed:()=>Navigator.pop(context), icon: const Icon(Icons.arrow_back, color: Colors.white)), Expanded(child: Text(title, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.bold))), const SizedBox(width:48)]))); }}
 class AccountPage extends StatelessWidget { const AccountPage({super.key}); @override Widget build(BuildContext context) { final a=current??accounts.values.first; return Scaffold(backgroundColor: const Color(0xfff5f5f5), body: Column(children:[const TopBar('تفاصيل الحساب'), Padding(padding: const EdgeInsets.all(16), child: CardBox(children:[InfoRow('إسم صاحب الحساب',a.name), InfoRow('رقم الحساب',a.account), InfoRow('IBAN',a.iban), InfoRow('الرصيد','${a.balance.toStringAsFixed(2)} جنيه')]))])); }}
