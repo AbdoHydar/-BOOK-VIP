@@ -149,7 +149,110 @@ class ActionTile extends StatelessWidget { final String title, asset; final Void
 class TransferBankPage extends StatefulWidget { const TransferBankPage({super.key}); @override State<TransferBankPage> createState()=>_TransferBankPageState(); }
 class _TransferBankPageState extends State<TransferBankPage>{ final to=TextEditingController(), amount=TextEditingController(), mobile=TextEditingController(), comment=TextEditingController(); String error=''; void submit(){ final sender=current??accounts.values.first; final rec=accounts[to.text.trim()]; final amt=double.tryParse(amount.text.trim().replaceAll(',',''))??0; if(rec==null){setState(()=>error='الحساب المستلم غير موجود');return;} if(amt<=0){setState(()=>error='أدخل مبلغ صحيح');return;} if(sender.balance<amt){setState(()=>error='فشل التحويل: الرصيد غير كافي');return;} sender.balance-=amt; rec.balance+=amt; final t=Txn(id:'${DateTime.now().millisecondsSinceEpoch}${Random().nextInt(90)+10}', from: sender.account, to: rec.account, toName: rec.name, mobile: mobile.text.trim().isEmpty?'N/A':mobile.text.trim(), comment: comment.text.trim().isEmpty?'N/A':comment.text.trim(), amount: amt, time: DateTime.now()); txns.insert(0,t); Navigator.pushReplacement(context,MaterialPageRoute(builder:(_)=>SuccessPage(txn:t))); } @override Widget build(BuildContext context)=>Scaffold(backgroundColor:Colors.white, body:Column(children:[const TopBar('تحويل لحساب'), Expanded(child:SingleChildScrollView(padding:const EdgeInsets.all(18), child:Column(children:[FieldBox(controller:to,hint:'أدخل رقم حساب المستلم',icon:Icons.account_balance,keyboard:TextInputType.number), const SizedBox(height:14), FieldBox(controller:amount,hint:'المبلغ',icon:Icons.money,keyboard:TextInputType.number), const SizedBox(height:14), FieldBox(controller:mobile,hint:'رقم الموبايل أو N/A',icon:Icons.phone,keyboard:TextInputType.phone), const SizedBox(height:14), FieldBox(controller:comment,hint:'التعليق',icon:Icons.comment), const SizedBox(height:25), ElevatedButton(onPressed:submit, style:ElevatedButton.styleFrom(backgroundColor:red2, minimumSize:const Size(double.infinity,58), shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(12))), child:const Text('إرسال',style:TextStyle(fontSize:20,color:Colors.white))), const SizedBox(height:12), Text(error,style:const TextStyle(color:red2,fontWeight:FontWeight.bold))])))])); }
 
-class SuccessPage extends StatelessWidget { final Txn txn; const SuccessPage({super.key, required this.txn}); String dt(DateTime d)=>'${d.year}/${d.month.toString().padLeft(2,'0')}/${d.day.toString().padLeft(2,'0')} ${d.hour.toString().padLeft(2,'0')}:${d.minute.toString().padLeft(2,'0')}'; @override Widget build(BuildContext context)=>Scaffold(body:Container(decoration:const BoxDecoration(color:Color(0xff0b9b58), image:DecorationImage(image:AssetImage('assets/img/notify_bg.png'),fit:BoxFit.cover)), child:SafeArea(child:Column(children:[const SizedBox(height:34), Container(width:78,height:78,decoration:BoxDecoration(shape:BoxShape.circle,border:Border.all(color:Colors.white,width:5)),child:const Icon(Icons.check,color:Colors.white,size:48)), const SizedBox(height:28), Padding(padding:const EdgeInsets.symmetric(horizontal:22), child:CardBox(children:[InfoRow('رقم العملية',txn.id),InfoRow('التاريخ والزمن',dt(txn.time)),InfoRow('من حساب',txn.from),InfoRow('إلى حساب',txn.to),InfoRow('إسم المرسل إليه',txn.toName),InfoRow('رقم الموبايل',txn.mobile),InfoRow('التعليق',txn.comment),InfoRow('المبلغ','${txn.amount.toStringAsFixed(2)} جنيه')])), const Spacer(), Padding(padding:const EdgeInsets.symmetric(horizontal:35), child:Row(children:[Expanded(child:OutlinedButton(onPressed:()=>showDialog(context:context,builder:(_)=>AlertDialog(content:const Text('قريبا...'), actions:[TextButton(onPressed:()=>Navigator.pop(context), child:const Text('موافق'))])), child:const Text('طباعة',style:TextStyle(color:Colors.white)))), const SizedBox(width:16), Expanded(child:ElevatedButton(onPressed:()=>Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder:(_)=>const TransferBankPage()),(r)=>false), style:ElevatedButton.styleFrom(backgroundColor:Colors.white), child:const Text('موافق',style:TextStyle(color:Color(0xff0b9b58),fontWeight:FontWeight.bold))))])), const SizedBox(height:28)])))); }
+
+class SuccessPage extends StatelessWidget {
+  final Txn txn;
+  const SuccessPage({super.key, required this.txn});
+
+  String dt(DateTime d) =>
+      '${d.year}/${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')} '
+      '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            color: Color(0xff0b9b58),
+            image: DecorationImage(
+              image: AssetImage('assets/img/notify_bg.png'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(height: 34),
+                Container(
+                  width: 78,
+                  height: 78,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 5),
+                  ),
+                  child: const Icon(Icons.check, color: Colors.white, size: 48),
+                ),
+                const SizedBox(height: 28),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 22),
+                  child: CardBox(
+                    children: [
+                      InfoRow('رقم العملية', txn.id),
+                      InfoRow('التاريخ والزمن', dt(txn.time)),
+                      InfoRow('من حساب', txn.from),
+                      InfoRow('إلى حساب', txn.to),
+                      InfoRow('إسم المرسل إليه', txn.toName),
+                      InfoRow('رقم الموبايل', txn.mobile),
+                      InfoRow('التعليق', txn.comment),
+                      InfoRow('المبلغ', '${txn.amount.toStringAsFixed(2)} جنيه'),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 35),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => showDialog(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              content: const Text('قريبا...'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('موافق'),
+                                ),
+                              ],
+                            ),
+                          ),
+                          child: const Text(
+                            'طباعة',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (_) => const TransferBankPage()),
+                            (r) => false,
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                          ),
+                          child: const Text(
+                            'موافق',
+                            style: TextStyle(
+                              color: Color(0xff0b9b58),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 28),
+              ],
+            ),
+          ),
+        ),
+      );
+}
+
 class TransactionsPage extends StatelessWidget { const TransactionsPage({super.key}); @override Widget build(BuildContext context)=>Scaffold(backgroundColor:const Color(0xfff6f6f6), body:Column(children:[const TopBar('المعاملات السابقة'), Expanded(child:txns.isEmpty?const Center(child:Text('لا توجد معاملات سابقة')):ListView.builder(padding:const EdgeInsets.all(12), itemCount:txns.length, itemBuilder:(_,i){final t=txns[i]; return ActionTile('تحويل إلى ${t.toName} - ${t.amount.toStringAsFixed(2)} جنيه','assets/img/trxhisothft.png',()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>SuccessPage(txn:t))));}))])); }
 class ComingSoonPage extends StatelessWidget { final String title; const ComingSoonPage({super.key,required this.title}); @override Widget build(BuildContext context)=>Scaffold(body:Column(children:[TopBar(title), const Expanded(child:Center(child:Text('قريبا...',style:TextStyle(fontSize:25,color:Colors.grey))))])); }
 class AdminPage extends StatefulWidget { const AdminPage({super.key}); @override State<AdminPage> createState()=>_AdminPageState(); }
