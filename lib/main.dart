@@ -255,5 +255,136 @@ class SuccessPage extends StatelessWidget {
 
 class TransactionsPage extends StatelessWidget { const TransactionsPage({super.key}); @override Widget build(BuildContext context)=>Scaffold(backgroundColor:const Color(0xfff6f6f6), body:Column(children:[const TopBar('المعاملات السابقة'), Expanded(child:txns.isEmpty?const Center(child:Text('لا توجد معاملات سابقة')):ListView.builder(padding:const EdgeInsets.all(12), itemCount:txns.length, itemBuilder:(_,i){final t=txns[i]; return ActionTile('تحويل إلى ${t.toName} - ${t.amount.toStringAsFixed(2)} جنيه','assets/img/trxhisothft.png',()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>SuccessPage(txn:t))));}))])); }
 class ComingSoonPage extends StatelessWidget { final String title; const ComingSoonPage({super.key,required this.title}); @override Widget build(BuildContext context)=>Scaffold(body:Column(children:[TopBar(title), const Expanded(child:Center(child:Text('قريبا...',style:TextStyle(fontSize:25,color:Colors.grey))))])); }
-class AdminPage extends StatefulWidget { const AdminPage({super.key}); @override State<AdminPage> createState()=>_AdminPageState(); }
-class _AdminPageState extends State<AdminPage>{ final u=TextEditingController(),p=TextEditingController(),acc=TextEditingController(),name=TextEditingController(),bal=TextEditingController(); bool ok=false; void add(){ if(acc.text.isEmpty)return; accounts[acc.text.trim()]=Account(account:acc.text.trim(),password:'1234',name:name.text.trim().isEmpty?'عميل جديد':name.text.trim(),iban:'SD213724000000${acc.text.trim()}',balance:double.tryParse(bal.text.trim())??0); setState((){}); } @override Widget build(BuildContext context)=>Scaffold(backgroundColor:Colors.white, body:Column(children:[const TopBar('لوحة الأدمن'), Expanded(child:SingleChildScrollView(padding:const EdgeInsets.all(16), child: ok?Column(children:[FieldBox(controller:acc,hint:'رقم الحساب الجديد',icon:Icons.numbers),const SizedBox(height:12),FieldBox(controller:name,hint:'إسم صاحب الحساب',icon:Icons.person),const SizedBox(height:12),FieldBox(controller:bal,hint:'الرصيد',icon:Icons.money),const SizedBox(height:12),ElevatedButton(onPressed:add,style:ElevatedButton.styleFrom(backgroundColor:red2,minimumSize:const Size(double.infinity,55)),child:const Text('إضافة حساب',style:TextStyle(color:Colors.white))),const SizedBox(height:18),...accounts.values.map((a)=>InfoRow(a.account,'${a.name} - ${a.balance.toStringAsFixed(2)}'))]):Column(children:[FieldBox(controller:u,hint:'إسم المستخدم',icon:Icons.admin_panel_settings),const SizedBox(height:12),FieldBox(controller:p,hint:'كلمة المرور',icon:Icons.lock,obscure:true),const SizedBox(height:12),ElevatedButton(onPressed:(){if(u.text=='admin'&&p.text=='admin1234')setState(()=>ok=true);},style:ElevatedButton.styleFrom(backgroundColor:red2,minimumSize:const Size(double.infinity,55)),child:const Text('دخول',style:TextStyle(color:Colors.white)))]) ))])); }}
+
+class AdminPage extends StatefulWidget {
+  const AdminPage({super.key});
+
+  @override
+  State<AdminPage> createState() => _AdminPageState();
+}
+
+class _AdminPageState extends State<AdminPage> {
+  final u = TextEditingController();
+  final p = TextEditingController();
+  final acc = TextEditingController();
+  final name = TextEditingController();
+  final bal = TextEditingController();
+
+  bool ok = false;
+
+  void add() {
+    if (acc.text.trim().isEmpty) return;
+
+    final accountNo = acc.text.trim();
+    accounts[accountNo] = Account(
+      account: accountNo,
+      password: '1234',
+      name: name.text.trim().isEmpty ? 'عميل جديد' : name.text.trim(),
+      iban: 'SD213724000000$accountNo',
+      balance: double.tryParse(bal.text.trim()) ?? 0,
+    );
+
+    acc.clear();
+    name.clear();
+    bal.clear();
+    setState(() {});
+  }
+
+  void loginAdmin() {
+    if (u.text.trim() == 'admin' && p.text.trim() == 'admin1234') {
+      setState(() => ok = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          const TopBar('لوحة الأدمن'),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: ok ? _adminPanel() : _loginPanel(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _loginPanel() {
+    return Column(
+      children: [
+        FieldBox(
+          controller: u,
+          hint: 'إسم المستخدم',
+          icon: Icons.admin_panel_settings,
+        ),
+        const SizedBox(height: 12),
+        FieldBox(
+          controller: p,
+          hint: 'كلمة المرور',
+          icon: Icons.lock,
+          obscure: true,
+        ),
+        const SizedBox(height: 12),
+        ElevatedButton(
+          onPressed: loginAdmin,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: red2,
+            minimumSize: const Size(double.infinity, 55),
+          ),
+          child: const Text(
+            'دخول',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _adminPanel() {
+    return Column(
+      children: [
+        FieldBox(
+          controller: acc,
+          hint: 'رقم الحساب الجديد',
+          icon: Icons.numbers,
+        ),
+        const SizedBox(height: 12),
+        FieldBox(
+          controller: name,
+          hint: 'إسم صاحب الحساب',
+          icon: Icons.person,
+        ),
+        const SizedBox(height: 12),
+        FieldBox(
+          controller: bal,
+          hint: 'الرصيد',
+          icon: Icons.money,
+        ),
+        const SizedBox(height: 12),
+        ElevatedButton(
+          onPressed: add,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: red2,
+            minimumSize: const Size(double.infinity, 55),
+          ),
+          child: const Text(
+            'إضافة حساب',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        const SizedBox(height: 18),
+        ...accounts.values.map(
+          (a) => InfoRow(
+            a.account,
+            '${a.name} - ${a.balance.toStringAsFixed(2)}',
+          ),
+        ),
+      ],
+    );
+  }
+}
