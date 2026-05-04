@@ -27,7 +27,7 @@ jobs:
           channel: stable
 
       - name: Generate Android project
-        run: flutter create . --platforms=android --org com.bokvip
+        run: flutter create . --platforms=android --org com.bokvip --project-name bok_vip
 
       - name: Add Android permissions
         run: |
