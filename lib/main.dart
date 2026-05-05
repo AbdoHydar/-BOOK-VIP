@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -9,7 +10,7 @@ void main() {
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
+      statusBarColor: Color(0xffd50000),
       statusBarIconBrightness: Brightness.light,
       systemNavigationBarColor: Colors.black,
       systemNavigationBarIconBrightness: Brightness.light,
@@ -26,21 +27,23 @@ class BokVipApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: FullScreenPwa(),
+      home: SplashThenFastWeb(),
     );
   }
 }
 
-class FullScreenPwa extends StatefulWidget {
-  const FullScreenPwa({super.key});
+class SplashThenFastWeb extends StatefulWidget {
+  const SplashThenFastWeb({super.key});
 
   @override
-  State<FullScreenPwa> createState() => _FullScreenPwaState();
+  State<SplashThenFastWeb> createState() => _SplashThenFastWebState();
 }
 
-class _FullScreenPwaState extends State<FullScreenPwa> {
+class _SplashThenFastWebState extends State<SplashThenFastWeb> {
   late final WebViewController controller;
+  bool showFlutterSplash = true;
 
+  // لا نحذف splash من الموقع، نفتح الرابط الأصلي
   static const String appUrl = 'https://sweet-tulumba-bde789.netlify.app/';
 
   @override
@@ -49,18 +52,54 @@ class _FullScreenPwaState extends State<FullScreenPwa> {
 
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.black)
+      ..setBackgroundColor(Colors.white)
       ..enableZoom(false)
       ..setNavigationDelegate(
         NavigationDelegate(
-          onWebResourceError: (WebResourceError error) {},
+          onPageStarted: (_) {},
+          onPageFinished: (_) async {
+            // تحسينات خفيفة بعد تحميل الصفحة
+            await controller.runJavaScript('''
+              try {
+                document.body.style.webkitTapHighlightColor = 'transparent';
+                document.documentElement.style.scrollBehavior = 'auto';
+
+                var videos = document.querySelectorAll('video');
+                videos.forEach(function(v){
+                  v.setAttribute('playsinline', 'true');
+                  v.muted = true;
+                });
+
+                var imgs = document.querySelectorAll('img');
+                imgs.forEach(function(img){
+                  img.loading = 'eager';
+                  img.decoding = 'async';
+                });
+              } catch(e) {}
+            ''');
+
+            // نعرض Splash Flutter فقط أثناء التجهيز ثم نكشف الموقع
+            Timer(const Duration(milliseconds: 700), () {
+              if (mounted) {
+                setState(() => showFlutterSplash = false);
+              }
+            });
+          },
+          onWebResourceError: (_) {},
         ),
       )
       ..loadRequest(Uri.parse(appUrl));
+
+    // احتياط: لا يبقى Splash Flutter أكثر من 3 ثواني
+    Timer(const Duration(seconds: 3), () {
+      if (mounted && showFlutterSplash) {
+        setState(() => showFlutterSplash = false);
+      }
+    });
   }
 
   Future<bool> handleBack() async {
-    if (await controller.canGoBack()) {
+    if (!showFlutterSplash && await controller.canGoBack()) {
       await controller.goBack();
       return false;
     }
@@ -71,43 +110,38 @@ class _FullScreenPwaState extends State<FullScreenPwa> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: handleBack,
-      child: const Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
-          top: false,
-          bottom: false,
-          child: WebViewBody(),
+      child: Scaffold(
+        backgroundColor: const Color(0xffd50000),
+        body: Stack(
+          children: [
+            WebViewWidget(controller: controller),
+            if (showFlutterSplash) const FlutterSplash(),
+          ],
         ),
       ),
     );
   }
 }
 
-class WebViewBody extends StatefulWidget {
-  const WebViewBody({super.key});
-
-  @override
-  State<WebViewBody> createState() => _WebViewBodyState();
-}
-
-class _WebViewBodyState extends State<WebViewBody> {
-  late final WebViewController controller;
-
-  static const String appUrl = 'https://sweet-tulumba-bde789.netlify.app/';
-
-  @override
-  void initState() {
-    super.initState();
-
-    controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.black)
-      ..enableZoom(false)
-      ..loadRequest(Uri.parse(appUrl));
-  }
+class FlutterSplash extends StatelessWidget {
+  const FlutterSplash({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return WebViewWidget(controller: controller);
+    return Container(
+      color: const Color(0xffd50000),
+      width: double.infinity,
+      height: double.infinity,
+      alignment: Alignment.center,
+      child: const Text(
+        'bankak',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 46,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1,
+        ),
+      ),
+    );
   }
 }
