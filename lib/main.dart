@@ -41,7 +41,7 @@ class FullScreenPwa extends StatefulWidget {
 class _FullScreenPwaState extends State<FullScreenPwa> {
   late final WebViewController controller;
 
-  static const String appUrl = 'https://willowy-blancmange-3165f7.netlify.app/';
+  static const String appUrl = 'https://sweet-tulumba-bde789.netlify.app/';
 
   @override
   void initState() {
@@ -53,7 +53,7 @@ class _FullScreenPwaState extends State<FullScreenPwa> {
       ..enableZoom(false)
       ..setNavigationDelegate(
         NavigationDelegate(
-          onWebResourceError: (error) {},
+          onWebResourceError: (WebResourceError error) {},
         ),
       )
       ..loadRequest(Uri.parse(appUrl));
@@ -71,10 +71,43 @@ class _FullScreenPwaState extends State<FullScreenPwa> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: handleBack,
-      child: Scaffold(
+      child: const Scaffold(
         backgroundColor: Colors.black,
-        body: WebViewWidget(controller: controller),
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: WebViewBody(),
+        ),
       ),
     );
+  }
+}
+
+class WebViewBody extends StatefulWidget {
+  const WebViewBody({super.key});
+
+  @override
+  State<WebViewBody> createState() => _WebViewBodyState();
+}
+
+class _WebViewBodyState extends State<WebViewBody> {
+  late final WebViewController controller;
+
+  static const String appUrl = 'https://sweet-tulumba-bde789.netlify.app/';
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(Colors.black)
+      ..enableZoom(false)
+      ..loadRequest(Uri.parse(appUrl));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WebViewWidget(controller: controller);
   }
 }
